@@ -17,22 +17,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/events", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/eventsService", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class EventsEndpoint {
 
-	private Events events;
+	private EventsService eventsService;
 
 	@Inject
 	public EventsEndpoint(
-		Events events
+		EventsService eventsService
 	) {
-		this.events = events;
+		this.eventsService = eventsService;
 	}
 
 	@GetMapping
 	public EventsResponse getEvents() {
 		EventsResponse response = new EventsResponse();
-		response.setResponseBody(events.getAll());
+		response.setResponseBody(eventsService.getAll());
 		return response;
 	}
 
@@ -40,7 +40,7 @@ public class EventsEndpoint {
 	public EventsResponse getEvent(@PathVariable("id") Long id) {
 		EventsResponse response = new EventsResponse();
 		List<Event> eventList = new ArrayList<Event>();
-		eventList.add(events.getById(id));
+		eventList.add(eventsService.getById(id));
 		response.setResponseBody(eventList);
 
 		return response;

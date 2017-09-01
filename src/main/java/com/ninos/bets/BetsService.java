@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Component
-public class Bets {
+public class BetsService {
 
-	private static Logger logger = LoggerFactory.getLogger(Bets.class);
+	private static Logger logger = LoggerFactory.getLogger(BetsService.class);
 
 	private SettlementEngine settlementEngine;
 	private BetsRepository betsRepository;
 
 	@Inject
-	public Bets(
+	public BetsService(
 		SettlementEngine settlementEngine,
 		BetsRepository betsRepository
 	) {

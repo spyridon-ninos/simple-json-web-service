@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import java.util.List;
 
 @Component
-public class Events {
+public class EventsService {
 
 	private EventsRepository eventsRepository;
 
 	@Inject
-	public Events(
+	public EventsService(
 		EventsRepository eventsRepository
 	) {
 		this.eventsRepository = eventsRepository;

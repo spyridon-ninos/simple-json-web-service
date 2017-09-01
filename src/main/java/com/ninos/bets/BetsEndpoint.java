@@ -40,57 +40,57 @@ public final class BetsEndpoint {
 
 	private static Logger logger = LoggerFactory.getLogger(BetsEndpoint.class);
 
-	private final Bets bets;
+	private final BetsService betsService;
 
 	@Inject
 	public BetsEndpoint(
-		Bets bets
+		BetsService betsService
 	) {
-		this.bets = bets;
+		this.betsService = betsService;
 	}
 
 	@GetMapping
 	@ApiOperation(value = "get the history of all bets", response = BetsResponse.class)
 	public BetsResponse getAll() {
-		return buildNoErrorResponse(bets::getAll);
+		return buildNoErrorResponse(betsService::getAll);
 	}
 
 	@GetMapping("/{id}")
 	@ApiOperation(value = "get information of a single bet", response = BetsResponse.class)
 	public BetsResponse getById(@PathVariable("id") Long id) {
 		List<Bet> betList = new ArrayList<>();
-		betList.add(bets.getById(id));
+		betList.add(betsService.getById(id));
 		return buildNoErrorResponse(() -> betList);
 	}
 
 	@PostMapping
 	@ApiOperation(value = "place a bet", response = BetsResponse.class)
 	public BetsResponse save(@RequestBody BetPlaceRequest betPlaceRequest) {
-		return buildGenericBetsResponse(betPlaceRequest.toBet(), bets::save);
+		return buildGenericBetsResponse(betPlaceRequest.toBet(), betsService::save);
 	}
 
 	@DeleteMapping
 	@ApiOperation(value = "cancel a bet", response = BetsResponse.class)
 	public BetsResponse cancel(@RequestBody BetCancelRequest betCancelRequest) {
-		return buildGenericBetsResponse(betCancelRequest.toBet(), bets::cancel);
+		return buildGenericBetsResponse(betCancelRequest.toBet(), betsService::cancel);
 	}
 
 	@GetMapping(value = "/placed")
 	@ApiOperation(value = "get all placed and not cancelled, not settled bets", response = BetsResponse.class)
 	public BetsResponse getActive() {
-		return buildNoErrorResponse(bets::getActive);
+		return buildNoErrorResponse(betsService::getActive);
 	}
 
 	@GetMapping(value = "/cancelled")
 	@ApiOperation(value = "get all cancelled bets", response = BetsResponse.class)
 	public BetsResponse getCancelled() {
-		return buildNoErrorResponse(bets::getCancelled);
+		return buildNoErrorResponse(betsService::getCancelled);
 	}
 
 	@GetMapping(value = "/settled")
 	@ApiOperation(value = "get all settled events", response = BetsResponse.class)
 	public BetsResponse getSettled() {
-		return buildNoErrorResponse(bets::getSettled);
+		return buildNoErrorResponse(betsService::getSettled);
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
