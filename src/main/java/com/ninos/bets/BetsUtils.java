@@ -8,6 +8,7 @@ import com.ninos.bets.model.ErrorType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,19 +37,20 @@ public final class BetsUtils {
 		return buildGenericBetsResponse(errorSupplier, null);
 	}
 
-	public static BetsResponse buildGenericBetsResponse(Supplier<List<Error>> errorSupplier, Supplier<List<Bet>> betSupplier) {
+	public static BetsResponse buildGenericBetsResponse(
+			Supplier<List<Error>> errorSupplier,
+			Supplier<List<Bet>> betSupplier
+	) {
+
+		List<Error> errorList = Optional.ofNullable(errorSupplier)
+		                                .map(Supplier::get)
+		                                .orElse(Collections.emptyList());
+
+		List<Bet> betList = Optional.ofNullable(betSupplier)
+		                            .map(Supplier::get)
+		                            .orElse(Collections.emptyList());
+
 		BetsResponse betsResponse = new BetsResponse();
-		List<Error> errorList = new ArrayList<>();
-		List<Bet> betList = new ArrayList<>();
-
-		if (errorSupplier != null) {
-			errorList.addAll(errorSupplier.get());
-		}
-
-		if (betSupplier != null) {
-			betList.addAll(betSupplier.get());
-		}
-
 		betsResponse.setErrors(errorList);
 		betsResponse.setResponseBody(betList);
 
