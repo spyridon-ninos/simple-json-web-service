@@ -4,3 +4,7 @@ server:
 bets:
   settlement:
     period: 120000 # in milliseconds
+
+app:
+  api:
+    version: v1

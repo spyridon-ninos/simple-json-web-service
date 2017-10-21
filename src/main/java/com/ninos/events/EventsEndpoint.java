@@ -3,6 +3,7 @@ package com.ninos.events;
 import com.ninos.bets.model.ErrorType;
 import com.ninos.events.model.Event;
 import com.ninos.events.model.EventsResponse;
+import com.ninos.events.model.NoSuchEventException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,7 +38,7 @@ public class EventsEndpoint {
 	}
 
 	@GetMapping(value = "/{id}")
-	public EventsResponse getEvent(@PathVariable("id") Long id) {
+	public EventsResponse getEvent(@PathVariable("id") Long id) throws NoSuchEventException {
 		EventsResponse response = new EventsResponse();
 		List<Event> eventList = new ArrayList<Event>();
 		eventList.add(eventsService.getById(id));
@@ -46,10 +47,10 @@ public class EventsEndpoint {
 		return response;
 	}
 
-	@ExceptionHandler(IllegalArgumentException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public EventsResponse handleIllegalArgument(IllegalArgumentException e) {
-		return EventsUtils.createErrorResponse(ErrorType.BAD_REQUEST, e.getMessage());
+	@ExceptionHandler(NoSuchEventException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public EventsResponse handleNoSuchEvent(NoSuchEventException e) {
+		return EventsUtils.createErrorResponse(ErrorType.NO_SUCH_RESOURCE, e.getMessage());
 	}
 
 	@ExceptionHandler(Exception.class)

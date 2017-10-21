@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class BetsUtils {
@@ -53,18 +52,6 @@ public final class BetsUtils {
 		BetsResponse betsResponse = new BetsResponse();
 		betsResponse.setErrors(errorList);
 		betsResponse.setResponseBody(betList);
-
-		return betsResponse;
-	}
-
-	public static BetsResponse buildGenericBetsResponse(Bet bet, Function<Bet, Bet> function) {
-		BetsResponse betsResponse = new BetsResponse();
-		List<Bet> betList = new ArrayList<>();
-
-		betList.add(function.apply(bet));
-		betsResponse.setResponseBody(betList);
-
-		betsResponse.setErrors(Collections.emptyList());
 
 		return betsResponse;
 	}

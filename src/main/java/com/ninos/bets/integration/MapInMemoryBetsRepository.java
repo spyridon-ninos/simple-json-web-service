@@ -3,7 +3,9 @@ package com.ninos.bets.integration;
 import com.ninos.bets.BetsRepository;
 import com.ninos.bets.model.Bet;
 import com.ninos.bets.model.BetStatus;
+import com.ninos.bets.model.NoSuchBetException;
 import com.ninos.events.EventsRepository;
+import com.ninos.events.model.NoSuchEventException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -60,19 +62,20 @@ public final class MapInMemoryBetsRepository implements BetsRepository {
 		return new ArrayList<>(betMap.values());
 	}
 
-	public synchronized Bet getById(Long id) {
+	public synchronized Bet getById(Long id) throws NoSuchBetException {
 		if (betMap.keySet().contains(id)) {
 			return betMap.get(id);
 		}
 
-		throw new IllegalArgumentException("Bet with id " + id + " was not found");
+		throw new NoSuchBetException("Bet with id " + id + " was not found");
 	}
 
-	public synchronized Bet save(Bet bet) {
+	public synchronized Bet save(Bet bet) throws NoSuchEventException {
 		// with a real db, some sort of optimisation should take place here
 		if (eventsRepository.getById(bet.getEventId()) == null) {
 			throw new IllegalArgumentException("No event with id " + bet.getEventId() + " was found");
 		}
+		eventsRepository.getById(bet.getEventId());
 
 		Long nextId = getNextId();
 		bet.setId(nextId);
@@ -81,7 +84,7 @@ public final class MapInMemoryBetsRepository implements BetsRepository {
 		return bet;
 	}
 
-	public synchronized Bet cancel(Long id) {
+	public synchronized Bet cancel(Long id) throws NoSuchBetException {
 		Bet bet = getById(id);
 
 		// only cancel bets that are pending settlement
@@ -94,7 +97,7 @@ public final class MapInMemoryBetsRepository implements BetsRepository {
 		return bet;
 	}
 
-	public synchronized Bet settle(Long id, boolean punterWon) {
+	public synchronized Bet settle(Long id, boolean punterWon) throws NoSuchBetException {
 		Bet bet = getById(id);
 
 		// we settle bets only if they are stin pending settlement (placed)

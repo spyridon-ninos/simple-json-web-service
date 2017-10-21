@@ -1,5 +1,6 @@
 package com.ninos.bets;
 
+import com.ninos.bets.model.NoSuchBetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +56,8 @@ public class SettlementEngine {
 				betsRepository.settle(betId, won);
 			} catch (InterruptedException e) {
 				logger.error("Sleeping for 2 mins was interrupted: {}. Did not settle bet id: {}", e.getMessage(), betId, e);
+			} catch (NoSuchBetException e) {
+				logger.error("There is not a bet with id: {}", betId, e);
 			}
 		}
 

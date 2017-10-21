@@ -1,14 +1,14 @@
 package com.ninos.bets;
 
 import com.ninos.bets.model.Bet;
-import com.ninos.bets.model.NoResultsFoundException;
+import com.ninos.bets.model.NoSuchBetException;
+import com.ninos.events.model.NoSuchEventException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.function.Supplier;
 
 @Component
 public class BetsService {
@@ -28,42 +28,32 @@ public class BetsService {
 	}
 
 	public List<Bet> getAll() {
-		return getBets(betsRepository::getHistory);
+		return betsRepository.getHistory();
 	}
 
-	public Bet getById(Long id) {
+	public Bet getById(Long id) throws NoSuchBetException {
 		return betsRepository.getById(id);
 	}
 
-	public Bet save(Bet bet) {
+	public Bet save(Bet bet) throws NoSuchEventException {
 		Bet savedBet = betsRepository.save(bet);
 		settlementEngine.schedule(savedBet.getId());
 		return savedBet;
 	}
 
-	public Bet cancel(Bet bet) {
+	public Bet cancel(Bet bet) throws NoSuchBetException {
 		return betsRepository.cancel(bet.getId());
 	}
 
 	public List<Bet> getCancelled() {
-		return getBets(betsRepository::getCancelled);
+		return betsRepository.getCancelled();
 	}
 
 	public List<Bet> getSettled() {
-		return getBets(betsRepository::getSettled);
+		return betsRepository.getSettled();
 	}
 
 	public List<Bet> getActive() {
-		return getBets(betsRepository::getPlaced);
-	}
-
-	private List<Bet> getBets(Supplier<List<Bet>> betSupplier) {
-		List<Bet> betList = betSupplier.get();
-
-		if (betList.isEmpty()) {
-			throw new NoResultsFoundException();
-		}
-
-		return betList;
+		return betsRepository.getPlaced();
 	}
 }

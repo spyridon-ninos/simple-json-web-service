@@ -5,7 +5,8 @@ import com.ninos.bets.model.BetCancelRequest;
 import com.ninos.bets.model.BetPlaceRequest;
 import com.ninos.bets.model.BetsResponse;
 import com.ninos.bets.model.ErrorType;
-import com.ninos.bets.model.NoResultsFoundException;
+import com.ninos.bets.model.NoSuchBetException;
+import com.ninos.events.model.NoSuchEventException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -25,16 +26,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static com.ninos.bets.BetsUtils.buildErrorResponse;
 import static com.ninos.bets.BetsUtils.buildErrors;
-import static com.ninos.bets.BetsUtils.buildGenericBetsResponse;
 import static com.ninos.bets.BetsUtils.buildNoErrorResponse;
 
 @RestController
-@RequestMapping(value = "/bets", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(
+		value = "/api/${app.api.version}/bets",
+		produces = MediaType.APPLICATION_JSON_UTF8_VALUE
+)
 @Api
 public final class BetsEndpoint {
 
@@ -57,7 +61,7 @@ public final class BetsEndpoint {
 
 	@GetMapping("/{id}")
 	@ApiOperation(value = "get information of a single bet", response = BetsResponse.class)
-	public BetsResponse getById(@PathVariable("id") Long id) {
+	public BetsResponse getById(@PathVariable("id") Long id) throws NoSuchBetException {
 		List<Bet> betList = new ArrayList<>();
 		betList.add(betsService.getById(id));
 		return buildNoErrorResponse(() -> betList);
@@ -65,14 +69,16 @@ public final class BetsEndpoint {
 
 	@PostMapping
 	@ApiOperation(value = "place a bet", response = BetsResponse.class)
-	public BetsResponse save(@RequestBody BetPlaceRequest betPlaceRequest) {
-		return buildGenericBetsResponse(betPlaceRequest.toBet(), betsService::save);
+	public BetsResponse save(@RequestBody BetPlaceRequest betPlaceRequest) throws NoSuchEventException {
+		Bet savedBet = betsService.save(betPlaceRequest.toBet());
+		return buildNoErrorResponse(() -> Arrays.asList(savedBet));
 	}
 
 	@DeleteMapping
 	@ApiOperation(value = "cancel a bet", response = BetsResponse.class)
-	public BetsResponse cancel(@RequestBody BetCancelRequest betCancelRequest) {
-		return buildGenericBetsResponse(betCancelRequest.toBet(), betsService::cancel);
+	public BetsResponse cancel(@RequestBody BetCancelRequest betCancelRequest) throws NoSuchBetException {
+		Bet cancelledBet = betsService.cancel(betCancelRequest.toBet());
+		return buildNoErrorResponse(() -> Arrays.asList(cancelledBet));
 	}
 
 	@GetMapping(value = "/placed")
@@ -93,11 +99,13 @@ public final class BetsEndpoint {
 		return buildNoErrorResponse(betsService::getSettled);
 	}
 
-	@ExceptionHandler(IllegalArgumentException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public BetsResponse handleIllegalArgument(IllegalArgumentException e) {
-		logger.error("Received an illegal argument exception: {}", e.getMessage(), e);
-		return buildErrorResponse(() -> buildErrors(ErrorType.BAD_REQUEST, e.getMessage()));
+	// maybe NOT_FOUND allows for enumeration? But in a production system authorisation should have been
+	// applied so anyone who's authorised to see bets, he should be allowed to enumerate bets
+	@ExceptionHandler(value = {NoSuchBetException.class, NoSuchEventException.class})
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public BetsResponse handleNoSuchExceptions(Exception e) {
+		logger.error("The requested resource was not found: {}", e.getMessage(), e);
+		return buildErrorResponse(() -> buildErrors(ErrorType.NO_SUCH_RESOURCE, e.getMessage()));
 	}
 
 	@ExceptionHandler(Exception.class)
@@ -108,18 +116,11 @@ public final class BetsEndpoint {
 		return buildErrorResponse(() -> buildErrors(ErrorType.UNKNOWN_ERROR, exceptionId));
 	}
 
-	@ExceptionHandler(NoResultsFoundException.class)
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public BetsResponse handleNoResultsFound(NoResultsFoundException e) {
-		String exceptionId = UUID.randomUUID().toString();
-		logger.info("{} No results found", exceptionId, e);
-		return buildErrorResponse(() -> buildErrors(ErrorType.NO_RESULT_FOUND, exceptionId));
-	}
-
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public BetsResponse handleJsonParseException(HttpMessageNotReadableException e) {
-		logger.error("Received an illegal argument exception: {}", e.getCause().getCause().getMessage(), e);
-		return buildErrorResponse(() -> buildErrors(ErrorType.BAD_REQUEST, e.getCause().getCause().getMessage()));
+	public BetsResponse handleMessageNotReadableException(HttpMessageNotReadableException e) {
+		String message = e.getCause().getCause().getMessage();
+		logger.error("The message could not be read: {}", message, e);
+		return buildErrorResponse(() -> buildErrors(ErrorType.BAD_REQUEST, message));
 	}
 }

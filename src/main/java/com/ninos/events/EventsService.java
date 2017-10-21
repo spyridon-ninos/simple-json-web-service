@@ -1,6 +1,7 @@
 package com.ninos.events;
 
 import com.ninos.events.model.Event;
+import com.ninos.events.model.NoSuchEventException;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ public class EventsService {
 		return eventsRepository.getAll();
 	}
 
-	public Event getById(Long id) {
+	public Event getById(Long id) throws NoSuchEventException {
 		return eventsRepository.getById(id);
 	}
 }

@@ -2,6 +2,7 @@ package com.ninos.events.integration;
 
 import com.ninos.events.EventsRepository;
 import com.ninos.events.model.Event;
+import com.ninos.events.model.NoSuchEventException;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -31,11 +32,11 @@ public class MapInMemoryEventsRepository implements EventsRepository {
 		return new ArrayList<Event>(events.values());
 	}
 
-	public Event getById(Long id) {
+	public Event getById(Long id) throws NoSuchEventException {
 		if (events.containsKey(id)) {
 			return events.get(id);
 		}
 
-		throw new IllegalArgumentException("Event with id " + id + " not found");
+		throw new NoSuchEventException("Event with id " + id + " not found");
 	}
 }
