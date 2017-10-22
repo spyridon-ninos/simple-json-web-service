@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.6.RELEASE</version>
+        <version>1.5.8.RELEASE</version>
     </parent>
 
     <properties>
@@ -19,7 +19,7 @@
         <apache-commons-lang3.version>3.6</apache-commons-lang3.version>
         <javax-inject.version>1</javax-inject.version>
         <maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
-        <maven-compiler-plugin.version>3.6.2</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
         <springfox-swagger.version>2.7.0</springfox-swagger.version>
     </properties>
 
