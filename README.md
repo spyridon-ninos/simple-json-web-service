@@ -27,7 +27,10 @@ The service should:
 - security
 
 ## Design decisions
-- the by-feature code organisation was used
+- the by-feature code organisation was intended to be used, however a feature (even though BDD does not have strict
+definitions) should have an action in it, e.g. placeBet etc. Because separating
+the code in a pure by-feature way created many inter-feature dependencies,
+the code was organised in a more domain-object-oriented way
 - although the [hexagonal architecture](http://alistair.cockburn.us/Hexagonal+architecture) was used, ports and adapters were not put in different packages, due to the small number of code files
 
 # How to use
